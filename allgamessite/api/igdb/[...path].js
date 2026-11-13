@@ -10,27 +10,36 @@ async function getToken() {
   const clientSecret = process.env.IGDB_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
-    throw new Error('Credenciais IGDB não configuradas.')
+    throw new Error('Credenciais IGDB não configuradas nas variáveis de ambiente do Vercel.')
   }
 
-  const response = await fetch(
+  const tokenResponse = await fetch(
     `https://id.twitch.tv/oauth2/token?client_id=${encodeURIComponent(clientId)}&client_secret=${encodeURIComponent(clientSecret)}&grant_type=client_credentials`,
     { method: 'POST' }
   )
 
-  const data = await response.json()
+  const tokenData = await tokenResponse.json()
 
-  if (!response.ok || !data.access_token) {
-    throw new Error(data.message || 'Falha na autenticação IGDB.')
+  if (!tokenResponse.ok || !tokenData.access_token) {
+    throw new Error(tokenData.message || 'Falha ao autenticar com a API da Twitch/IGDB.')
   }
 
-  cachedToken = data.access_token
-  tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000
+  cachedToken = tokenData.access_token
+  tokenExpiresAt = Date.now() + (tokenData.expires_in - 60) * 1000
 
   return cachedToken
 }
 
 export default async function handler(req, res) {
+  // Permite CORS se necessário
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end()
+  }
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Método não permitido.' })
@@ -47,16 +56,15 @@ export default async function handler(req, res) {
 
     const token = await getToken()
 
-    // Garante que o body seja sempre uma string válida para o IGDB
+    // Trata o corpo da requisição independentemente de vir como string ou objeto JSON
     let requestBody = ''
     if (typeof req.body === 'string') {
       requestBody = req.body
     } else if (req.body && typeof req.body === 'object') {
-      // Se o Vercel parseou como JSON, tenta transformar de volta ou extrair
       requestBody = JSON.stringify(req.body)
     }
 
-    const response = await fetch(
+    const igdbResponse = await fetch(
       `https://api.igdb.com/v4/${path}`,
       {
         method: 'POST',
@@ -69,12 +77,12 @@ export default async function handler(req, res) {
       }
     )
 
-    const result = await response.text()
-    return res.status(response.status).send(result)
+    const resultText = await igdbResponse.text()
+    return res.status(igdbResponse.status).send(resultText)
 
   } catch (error) {
     return res.status(500).json({
-      error: error.message || 'Erro na API IGDB.'
+      error: error.message || 'Erro interno ao processar requisição IGDB.'
     })
   }
 }
