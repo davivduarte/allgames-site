@@ -6,7 +6,7 @@ O **AllGames** apresenta uma experiência visual moderna, com tema escuro, eleme
 
 ## 🚀 Funcionalidades
 
-- 🎯 **Catálogo com 30 jogos:** seleção de títulos populares, incluindo GTA V, GTA VI, CS2, Overwatch 2, Fortnite, Minecraft, Valorant e Red Dead Redemption 2.
+- 🎯 **Catálogo com 30 jogos selecionados:** seleção de títulos populares, incluindo GTA V, GTA VI, CS2, Overwatch 2, Fortnite, Minecraft, Valorant e Red Dead Redemption 2.
 - 🖼️ **Galeria de imagens:** capas e artes relacionadas aos jogos, com imagens adicionais na página de detalhes.
 - ⭐ **Destaque GTA VI:** seção especial dedicada ao próximo lançamento da franquia Grand Theft Auto.
 - 📖 **Descrições detalhadas:** informações sobre história, ambientação e jogabilidade dos títulos.
