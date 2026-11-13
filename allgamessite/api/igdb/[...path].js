@@ -1,4 +1,3 @@
-
 let cachedToken = null
 let tokenExpiresAt = 0
 
@@ -48,6 +47,15 @@ export default async function handler(req, res) {
 
     const token = await getToken()
 
+    // Garante que o body seja sempre uma string válida para o IGDB
+    let requestBody = ''
+    if (typeof req.body === 'string') {
+      requestBody = req.body
+    } else if (req.body && typeof req.body === 'object') {
+      // Se o Vercel parseou como JSON, tenta transformar de volta ou extrair
+      requestBody = JSON.stringify(req.body)
+    }
+
     const response = await fetch(
       `https://api.igdb.com/v4/${path}`,
       {
@@ -57,7 +65,7 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'text/plain'
         },
-        body: typeof req.body === 'string' ? req.body : ''
+        body: requestBody
       }
     )
 
